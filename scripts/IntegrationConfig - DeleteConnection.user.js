@@ -1,7 +1,7 @@
 // ==UserScript==
 // @author       Evgeniy Lykhov
 // @name         Integration Config - Delete connection
-// @description  Скрипт встраивает в список подключений элементы для удобного выбора и последующего удаления подключений прямо на странице без скриптов.
+// @description  РЎРєСЂРёРїС‚ РІСЃС‚СЂР°РёРІР°РµС‚ РІ СЃРїРёСЃРѕРє РїРѕРґРєР»СЋС‡РµРЅРёР№ СЌР»РµРјРµРЅС‚С‹ РґР»СЏ СѓРґРѕР±РЅРѕРіРѕ РІС‹Р±РѕСЂР° Рё РїРѕСЃР»РµРґСѓСЋС‰РµРіРѕ СѓРґР°Р»РµРЅРёСЏ РїРѕРґРєР»СЋС‡РµРЅРёР№ РїСЂСЏРјРѕ РЅР° СЃС‚СЂР°РЅРёС†Рµ Р±РµР· СЃРєСЂРёРїС‚РѕРІ.
 // @version      18-07-2025
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
@@ -11,7 +11,7 @@
 // ==/UserScript==
 
 (async function() {
-	// 0. Вставка CSS для фиксированной ширины колонки, центрирования и отступов кнопок
+	// 0. Р’СЃС‚Р°РІРєР° CSS РґР»СЏ С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕР№ С€РёСЂРёРЅС‹ РєРѕР»РѕРЅРєРё, С†РµРЅС‚СЂРёСЂРѕРІР°РЅРёСЏ Рё РѕС‚СЃС‚СѓРїРѕРІ РєРЅРѕРїРѕРє
 	const style = document.createElement('style');
 	style.textContent = `
 .controls-DataGridView__th.DataGridView__td__checkBox,
@@ -68,7 +68,7 @@
 `;
 	document.head.append(style);
 
-	// Ждём появления целевой таблицы
+	// Р–РґС‘Рј РїРѕСЏРІР»РµРЅРёСЏ С†РµР»РµРІРѕР№ С‚Р°Р±Р»РёС†С‹
 	function waitFor(selector, timeout = 5000) {
 		return new Promise((resolve, reject) => {
 			const el = document.querySelector(selector);
@@ -83,7 +83,7 @@
 			obs.observe(document.body, { childList: true, subtree: true });
 			setTimeout(() => {
 				obs.disconnect();
-				reject(new Error(`Не найдена таблица ${selector}`));
+				reject(new Error(`РќРµ РЅР°Р№РґРµРЅР° С‚Р°Р±Р»РёС†Р° ${selector}`));
 			}, timeout);
 		});
 	}
@@ -93,7 +93,7 @@
 		const table = await waitFor('.controls-DataGridView__table.ws-sticky-header__table');
 		const tbody = table.querySelector('tbody');
 
-		// 1. Вставка колонки для чекбоксов в colgroup
+		// 1. Р’СЃС‚Р°РІРєР° РєРѕР»РѕРЅРєРё РґР»СЏ С‡РµРєР±РѕРєСЃРѕРІ РІ colgroup
 		function insertCol() {
 			const cg = table.querySelector('colgroup');
 			if (!cg || cg.querySelector('col[data-inserted]')) return;
@@ -103,11 +103,11 @@
 			cg.insertBefore(newCol, cg.firstElementChild);
 		}
 		insertCol();
-		// Следим за перерисовкой colgroup
+		// РЎР»РµРґРёРј Р·Р° РїРµСЂРµСЂРёСЃРѕРІРєРѕР№ colgroup
 		new MutationObserver(() => insertCol())
 			.observe(table.querySelector('colgroup').parentNode, { childList: true });
 
-		// 2. Добавление заголовочного <th> под чекбоксы
+		// 2. Р”РѕР±Р°РІР»РµРЅРёРµ Р·Р°РіРѕР»РѕРІРѕС‡РЅРѕРіРѕ <th> РїРѕРґ С‡РµРєР±РѕРєСЃС‹
 		function insertHeaderCell() {
 			const theadRow = table.querySelector('thead tr');
 			if (!theadRow || theadRow.querySelector('th.DataGridView__td__checkBox')) return;
@@ -123,7 +123,7 @@
 		new MutationObserver(() => insertHeaderCell())
 			.observe(table, { childList: true, subtree: true });
 
-		// 3. Добавление чекбокса в каждую строку
+		// 3. Р”РѕР±Р°РІР»РµРЅРёРµ С‡РµРєР±РѕРєСЃР° РІ РєР°Р¶РґСѓСЋ СЃС‚СЂРѕРєСѓ
 		function addRowCheckbox(tr) {
 			if (tr.querySelector('.DataGridView__td__checkBox input')) return;
 			const id = tr.getAttribute('data-id');
@@ -149,7 +149,7 @@
 				'td.DataGridView__td__checkBox input:checked'
 			).length;
 			const counter = document.getElementById('sbis-header-counter');
-			if (counter) counter.textContent = `Выбрано: ${count}`;
+			if (counter) counter.textContent = `Р’С‹Р±СЂР°РЅРѕ: ${count}`;
 		}
 		tbody.addEventListener('change', e => {
 			if (e.target.matches('td.DataGridView__td__checkBox input')) {
@@ -157,7 +157,7 @@
 			}
 		});
 
-		// 4. Панель кнопок над списком, справа от поиска
+		// 4. РџР°РЅРµР»СЊ РєРЅРѕРїРѕРє РЅР°Рґ СЃРїРёСЃРєРѕРј, СЃРїСЂР°РІР° РѕС‚ РїРѕРёСЃРєР°
 		function insertPanel() {
 			if (document.getElementById('sbis-panel')) return;
 			const searchCell = document.querySelector('.controls-Browser__tableCell-search');
@@ -173,7 +173,7 @@
 			panelRight.id = 'sbis-panel-right';
 
 			const btnAll = document.createElement('button');
-			btnAll.textContent = 'Выбрать все';
+			btnAll.textContent = 'Р’С‹Р±СЂР°С‚СЊ РІСЃРµ';
 			btnAll.className = 'controls-button';
 			btnAll.onclick = () => {
 				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = true);
@@ -181,7 +181,7 @@
 			}
 
 			const btnNone = document.createElement('button');
-			btnNone.textContent = 'Снять все';
+			btnNone.textContent = 'РЎРЅСЏС‚СЊ РІСЃРµ';
 			btnNone.className = 'controls-button';
 			btnNone.onclick = () => {
 				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
@@ -189,20 +189,20 @@
 			}
 
 			const btnDelete = document.createElement('button');
-			btnDelete.textContent = 'Удалить выбранные';
+			btnDelete.textContent = 'РЈРґР°Р»РёС‚СЊ РІС‹Р±СЂР°РЅРЅС‹Рµ';
 			btnDelete.className = 'controls-button';
 			btnDelete.onclick = () => {
 				const checked = Array.from(tbody.querySelectorAll('td.DataGridView__td__checkBox input:checked'));
 				const total = checked.length;
 				if (!total) {
-					alert('Не выбрано ни одного подключения для удаления.');
+					alert('РќРµ РІС‹Р±СЂР°РЅРѕ РЅРё РѕРґРЅРѕРіРѕ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ.');
 					return;
 				} else if (total <= connectionLimitForDeletion) {
-					if (!confirm(`Вы удаляете ${total} подключений. Продолжить?`)) return;
+					if (!confirm(`Р’С‹ СѓРґР°Р»СЏРµС‚Рµ ${total} РїРѕРґРєР»СЋС‡РµРЅРёР№. РџСЂРѕРґРѕР»Р¶РёС‚СЊ?`)) return;
 				} else if (total > connectionLimitForDeletion) {
-					if (!confirm(`Будут удалены первые ${connectionLimitForDeletion} из ${total} подключений - остальные останутся.\n` +
-								 `Необходимо будет обновить список и повторить удаление оставщихся.\n` +
-								 `Продолжить?`)) return;
+					if (!confirm(`Р‘СѓРґСѓС‚ СѓРґР°Р»РµРЅС‹ РїРµСЂРІС‹Рµ ${connectionLimitForDeletion} РёР· ${total} РїРѕРґРєР»СЋС‡РµРЅРёР№ - РѕСЃС‚Р°Р»СЊРЅС‹Рµ РѕСЃС‚Р°РЅСѓС‚СЃСЏ.\n` +
+								 `РќРµРѕР±С…РѕРґРёРјРѕ Р±СѓРґРµС‚ РѕР±РЅРѕРІРёС‚СЊ СЃРїРёСЃРѕРє Рё РїРѕРІС‚РѕСЂРёС‚СЊ СѓРґР°Р»РµРЅРёРµ РѕСЃС‚Р°РІС‰РёС…СЃСЏ.\n` +
+								 `РџСЂРѕРґРѕР»Р¶РёС‚СЊ?`)) return;
 				}
 
 				const toDelete = checked.slice(0, 50);
@@ -216,7 +216,7 @@
 
 					toDelete.forEach(cb => {
 						service.call('DeleteConnection', { id: cb.dataset.id });
-						console.log(`Удалено подключение: ${cb.dataset.id}`);
+						console.log(`РЈРґР°Р»РµРЅРѕ РїРѕРґРєР»СЋС‡РµРЅРёРµ: ${cb.dataset.id}`);
 					});
 
 					tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
@@ -226,7 +226,7 @@
 
 			const counter = document.createElement('span');
 			counter.id = 'sbis-header-counter';
-			counter.textContent = 'Выбрано: 0';
+			counter.textContent = 'Р’С‹Р±СЂР°РЅРѕ: 0';
 
 			panelLeft.append(counter);
 			panelLeft.append(btnAll, btnNone);
@@ -238,6 +238,6 @@
 		new MutationObserver(insertPanel).observe(document.body, { childList: true, subtree: true });
 
 	} catch (error) {
-		console.error('[Userscript] Ошибка:', error);
+		console.error('[Userscript] РћС€РёР±РєР°:', error);
 	}
 })();
