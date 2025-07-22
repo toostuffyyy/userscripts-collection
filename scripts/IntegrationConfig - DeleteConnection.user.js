@@ -4,6 +4,7 @@
 // @description  Скрипт встраивает в список подключений элементы для удобного выбора и последующего удаления подключений прямо на странице без скриптов.
 // @version      18-07-2025
 // @match        https://online.sbis.ru/integration_config/?Page=7*
+// @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=tampermonkey.net
 // @run-at       document-end
@@ -215,9 +216,11 @@
 
 					toDelete.forEach(cb => {
 						service.call('DeleteConnection', { id: cb.dataset.id });
+						console.log(`Удалено подключение: ${cb.dataset.id}`);
 					});
 
-					alert(`Отправлено запросов на удаление: ${toDelete.length} из ${total}`);
+					tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
+					updateHeaderCounter();
 				});
 			};
 
