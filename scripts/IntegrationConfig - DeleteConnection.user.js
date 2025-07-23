@@ -141,8 +141,8 @@
 		}
 		tbody.querySelectorAll('tr[data-id]').forEach(addRowCheckbox);
 		new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n =>
-																			n.nodeType === 1 && n.matches('tr[data-id]') && addRowCheckbox(n)
-																		   ))).observe(tbody, { childList: true });
+			n.nodeType === 1 && n.matches('tr[data-id]') && addRowCheckbox(n))))
+				.observe(tbody, { childList: true });
 
 		function updateHeaderCounter() {
 			const count = tbody.querySelectorAll(
