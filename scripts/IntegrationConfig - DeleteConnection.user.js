@@ -6,7 +6,7 @@
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=tampermonkey.net
+// @icon         https://cdn2.sbis.ru/cdn/SabyLogo/1.0.7/favicon/favicon.ico?v=1
 // @run-at       document-end
 // ==/UserScript==
 
