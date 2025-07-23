@@ -2,7 +2,7 @@
 // @author       Evgeniy Lykhov
 // @name         Integration Config - Delete connection
 // @description  Скрипт встраивает в список подключений элементы для удобного выбора и последующего удаления подключений прямо на странице без скриптов.
-// @version      18-07-2025
+// @version      24-07-2025
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
