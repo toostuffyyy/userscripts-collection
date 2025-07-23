@@ -14,58 +14,58 @@
 	// 0. Вставка CSS для фиксированной ширины колонки, центрирования и отступов кнопок
 	const style = document.createElement('style');
 	style.textContent = `
-.controls-DataGridView__th.DataGridView__td__checkBox,
-.controls-DataGridView__td.DataGridView__td__checkBox { width: 24px !important; text-align: center !important; min-width: 24px !important; max-width: 24px !important;}
-.controls-DataGridView__td.DataGridView__td__checkBox input { width: 50px; height: 17px; cursor: pointer; }
-.controls-button {
-    display: inline-block;
-    outline: 0;
-    line-height: normal;
-    box-sizing: border-box;
-    font-family: Inter;
-    font-size: 14px;
-    font-weight: 400;
-    position: relative;
-    box-shadow: none;
-    border: 1px solid #587ab0;
-    min-width: 48px;
-    text-shadow: none;
-    -webkit-user-select: none;
-    user-select: none;
-    color: #000;
-    background: #fff;
-    height: 24px;
-    padding: 0 11px;
-    border-radius: 16px;
-	white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.controls-button:hover {
-    background: #e1ecf6;
-}
-#sbis-panel {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0px 25px;
-	gap: 10px;
-}
-#sbis-panel-left,
-#sbis-panel-right {
-    display: flex;
-	align-items: center;
-	justify-content: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-	gap: 10px;
-}
-#sbis-header-counter {
-    font-size: 16px;
-	min-width: 110px;
-}
-`;
+	.controls-DataGridView__th.DataGridView__td__checkBox,
+	.controls-DataGridView__td.DataGridView__td__checkBox { width: 24px !important; text-align: center !important; min-width: 24px !important; max-width: 24px !important;}
+	.controls-DataGridView__td.DataGridView__td__checkBox input { width: 50px; height: 17px; cursor: pointer; }
+	.controls-button {
+	    display: inline-block;
+	    outline: 0;
+	    line-height: normal;
+	    box-sizing: border-box;
+	    font-family: Inter;
+	    font-size: 14px;
+	    font-weight: 400;
+	    position: relative;
+	    box-shadow: none;
+	    border: 1px solid #587ab0;
+	    min-width: 48px;
+	    text-shadow: none;
+	    -webkit-user-select: none;
+	    user-select: none;
+	    color: #000;
+	    background: #fff;
+	    height: 24px;
+	    padding: 0 11px;
+	    border-radius: 16px;
+		white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	}
+	.controls-button:hover {
+	    background: #e1ecf6;
+	}
+	#sbis-panel {
+	    display: flex;
+	    justify-content: space-between;
+	    align-items: center;
+	    margin: 0px 25px;
+		gap: 10px;
+	}
+	#sbis-panel-left,
+	#sbis-panel-right {
+	    display: flex;
+		align-items: center;
+		justify-content: center;
+	    white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+		gap: 10px;
+	}
+	#sbis-header-counter {
+	    font-size: 16px;
+		min-width: 110px;
+	}
+	`;
 	document.head.append(style);
 
 	// Ждём появления целевой таблицы
