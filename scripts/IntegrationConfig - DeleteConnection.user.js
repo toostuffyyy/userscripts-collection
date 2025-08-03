@@ -8,6 +8,9 @@
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
 // @icon         https://cdn2.sbis.ru/cdn/SabyLogo/1.0.7/favicon/favicon.ico?v=1
 // @run-at       document-end
+// @namespace https://greasyfork.org/users/1497438
+// @downloadURL https://update.greasyfork.org/scripts/543365/Integration%20Config%20-%20Delete%20connection.user.js
+// @updateURL https://update.greasyfork.org/scripts/543365/Integration%20Config%20-%20Delete%20connection.meta.js
 // ==/UserScript==
 
 (async function() {
@@ -15,8 +18,8 @@
 	const style = document.createElement('style');
 	style.textContent = `
 	.controls-DataGridView__th.DataGridView__td__checkBox,
-	.controls-DataGridView__td.DataGridView__td__checkBox { width: 24px !important; text-align: center !important; min-width: 24px !important; max-width: 24px !important;}
-	.controls-DataGridView__td.DataGridView__td__checkBox input { width: 50px; height: 17px; cursor: pointer; }
+	.controls-DataGridView__td.DataGridView__td__checkBox { width: 24px !important; text-align: center !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important;}
+	.controls-DataGridView__td.DataGridView__td__checkBox input { width: 16px; height: 16px; cursor: pointer;}
 	.controls-button {
 	    display: inline-block;
 	    outline: 0;
@@ -101,6 +104,11 @@
 			newCol.width = '24px';
 			newCol.setAttribute('data-inserted', 'true');
 			cg.insertBefore(newCol, cg.firstElementChild);
+
+            // сбрасываем width у всех остальных колонок
+            cg.querySelectorAll('col:not([data-inserted])').forEach(c => {
+                c.removeAttribute('width');
+            });
 		}
 		insertCol();
 		// Следим за перерисовкой colgroup
@@ -133,10 +141,15 @@
 			const cb = document.createElement('input');
 			cb.type = 'checkbox';
 			cb.dataset.id = id;
-			cb.style.alignContent = 'center';
 
 			cb.addEventListener('click', e => e.stopPropagation());
 			td.append(cb);
+            // делегируем клик на всю ячейку
+            td.addEventListener('click', () => {
+                cb.checked = !cb.checked;
+                updateHeaderCounter();
+            });
+
 			tr.insertBefore(td, tr.firstElementChild);
 		}
 		tbody.querySelectorAll('tr[data-id]').forEach(addRowCheckbox);
@@ -178,7 +191,7 @@
 			btnAll.onclick = () => {
 				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = true);
 				updateHeaderCounter();
-			}
+			};
 
 			const btnNone = document.createElement('button');
 			btnNone.textContent = 'Снять все';
@@ -186,7 +199,7 @@
 			btnNone.onclick = () => {
 				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
 				updateHeaderCounter();
-			}
+			};
 
 			const btnDelete = document.createElement('button');
 			btnDelete.textContent = 'Удалить выбранные';
@@ -205,7 +218,7 @@
 								 `Продолжить?`)) return;
 				}
 
-				const toDelete = checked.slice(0, 50);
+				const toDelete = checked.slice(0, connectionLimitForDeletion);
 				require(['Types/source'], src => {
 					const service = new src.SbisService({
 						endpoint: {
@@ -228,8 +241,7 @@
 			counter.id = 'sbis-header-counter';
 			counter.textContent = 'Выбрано: 0';
 
-			panelLeft.append(counter);
-			panelLeft.append(btnAll, btnNone);
+			panelLeft.append(counter, btnAll, btnNone);
 			panelRight.append(btnDelete);
 			panel.append(panelLeft, panelRight);
 			container.insertBefore(panel, searchCell.nextSibling);
