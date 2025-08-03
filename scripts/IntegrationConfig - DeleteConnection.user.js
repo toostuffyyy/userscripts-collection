@@ -2,7 +2,7 @@
 // @author       Evgeniy Lykhov
 // @name         Integration Config - Delete connection
 // @description  Пользовательский скрипт, добавляющий в список подключений на странице online.sbis.ru/integration_config/?Page=7 удобный интерфейс для выбора и удаления подключений напрямую, без необходимости удаления их вручную через сайт.
-// @version      26 (03-08-2025)
+// @version      27 (03-08-2025)
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
@@ -14,9 +14,9 @@
 // ==/UserScript==
 
 (async function() {
-	// 0. Вставка CSS для фиксированной ширины колонки, центрирования и отступов кнопок
-	const style = document.createElement('style');
-	style.textContent = `
+    // 0. Вставка CSS для фиксированной ширины колонки, центрирования и отступов кнопок
+    const style = document.createElement('style');
+    style.textContent = `
 	.controls-DataGridView__th.DataGridView__td__checkBox,
 	.controls-DataGridView__td.DataGridView__td__checkBox { width: 24px !important; text-align: center !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important;}
 	.controls-DataGridView__td.DataGridView__td__checkBox input { width: 16px; height: 16px; cursor: pointer;}
@@ -69,187 +69,194 @@
 		min-width: 110px;
 	}
 	`;
-	document.head.append(style);
+    document.head.append(style);
 
-	// Ждём появления целевой таблицы
-	function waitFor(selector, timeout = 5000) {
-		return new Promise((resolve, reject) => {
-			const el = document.querySelector(selector);
-			if (el) return resolve(el);
-			const obs = new MutationObserver(() => {
-				const found = document.querySelector(selector);
-				if (found) {
-					obs.disconnect();
-					resolve(found);
-				}
-			});
-			obs.observe(document.body, { childList: true, subtree: true });
-			setTimeout(() => {
-				obs.disconnect();
-				reject(new Error(`Не найдена таблица ${selector}`));
-			}, timeout);
-		});
-	}
+    // Ждём появления целевой таблицы
+    function waitFor(selector, timeout = 5000) {
+        return new Promise((resolve, reject) => {
+            const el = document.querySelector(selector);
+            if (el) return resolve(el);
+            const obs = new MutationObserver(() => {
+                const found = document.querySelector(selector);
+                if (found) {
+                    obs.disconnect();
+                    resolve(found);
+                }
+            });
+            obs.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => {
+                obs.disconnect();
+                reject(new Error(`Не найдена таблица ${selector}`));
+            }, timeout);
+        });
+    }
 
-	try {
-		const connectionLimitForDeletion = 50;
-		const table = await waitFor('.controls-DataGridView__table.ws-sticky-header__table');
-		const tbody = table.querySelector('tbody');
+    try {
+        const connectionLimitForDeletion = 50;
+        const table = await waitFor('.controls-DataGridView__table.ws-sticky-header__table');
+        const tbody = table.querySelector('tbody');
 
-		// 1. Вставка колонки для чекбоксов в colgroup
-		function insertCol() {
-			const cg = table.querySelector('colgroup');
-			if (!cg || cg.querySelector('col[data-inserted]')) return;
-			const newCol = document.createElement('col');
-			newCol.width = '24px';
-			newCol.setAttribute('data-inserted', 'true');
-			cg.insertBefore(newCol, cg.firstElementChild);
+        // 1. Вставка колонки для чекбоксов в colgroup
+        function insertCol() {
+            const cg = table.querySelector('colgroup');
+            if (!cg || cg.querySelector('col[data-inserted]')) return;
+            const newCol = document.createElement('col');
+            newCol.width = '24px';
+            newCol.setAttribute('data-inserted', 'true');
+            cg.insertBefore(newCol, cg.firstElementChild);
+
+            // === Установка ширины для второго col ===
+            const secondCol = cg.querySelectorAll('col')[1];
+            if (secondCol) {
+                secondCol.setAttribute('data-inserted', 'true');
+                secondCol.setAttribute('width', '850px');
+            }
 
             // сбрасываем width у всех остальных колонок
             cg.querySelectorAll('col:not([data-inserted])').forEach(c => {
                 c.removeAttribute('width');
             });
-		}
-		insertCol();
-		// Следим за перерисовкой colgroup
-		new MutationObserver(() => insertCol())
-			.observe(table.querySelector('colgroup').parentNode, { childList: true });
+        }
+        insertCol();
+        // Следим за перерисовкой colgroup
+        new MutationObserver(() => insertCol())
+            .observe(table.querySelector('colgroup').parentNode, { childList: true });
 
-		// 2. Добавление заголовочного <th> под чекбоксы
-		function insertHeaderCell() {
-			const theadRow = table.querySelector('thead tr');
-			if (!theadRow || theadRow.querySelector('th.DataGridView__td__checkBox')) return;
+        // 2. Добавление заголовочного <th> под чекбоксы
+        function insertHeaderCell() {
+            const theadRow = table.querySelector('thead tr');
+            if (!theadRow || theadRow.querySelector('th.DataGridView__td__checkBox')) return;
 
-			const th = document.createElement('th');
-			th.className = 'controls-DataGridView__th DataGridView__td__checkBox';
-			th.style.textAlign = 'center';
-			th.style.width = '24px';
+            const th = document.createElement('th');
+            th.className = 'controls-DataGridView__th DataGridView__td__checkBox';
+            th.style.textAlign = 'center';
+            th.style.width = '24px';
 
-			theadRow.insertBefore(th, theadRow.firstElementChild);
-		}
-		insertHeaderCell();
-		new MutationObserver(() => insertHeaderCell())
-			.observe(table, { childList: true, subtree: true });
+            theadRow.insertBefore(th, theadRow.firstElementChild);
+        }
+        insertHeaderCell();
+        new MutationObserver(() => insertHeaderCell())
+            .observe(table, { childList: true, subtree: true });
 
-		// 3. Добавление чекбокса в каждую строку
-		function addRowCheckbox(tr) {
-			if (tr.querySelector('.DataGridView__td__checkBox input')) return;
-			const id = tr.getAttribute('data-id');
-			if (!id) return;
-			const td = document.createElement('td');
-			td.className = 'controls-DataGridView__td DataGridView__td__checkBox';
-			const cb = document.createElement('input');
-			cb.type = 'checkbox';
-			cb.dataset.id = id;
+        // 3. Добавление чекбокса в каждую строку
+        function addRowCheckbox(tr) {
+            if (tr.querySelector('.DataGridView__td__checkBox input')) return;
+            const id = tr.getAttribute('data-id');
+            if (!id) return;
+            const td = document.createElement('td');
+            td.className = 'controls-DataGridView__td DataGridView__td__checkBox';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.dataset.id = id;
 
-			cb.addEventListener('click', e => e.stopPropagation());
-			td.append(cb);
+            cb.addEventListener('click', e => e.stopPropagation());
+            td.append(cb);
             // делегируем клик на всю ячейку
             td.addEventListener('click', () => {
                 cb.checked = !cb.checked;
                 updateHeaderCounter();
             });
 
-			tr.insertBefore(td, tr.firstElementChild);
-		}
-		tbody.querySelectorAll('tr[data-id]').forEach(addRowCheckbox);
-		new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n =>
-			n.nodeType === 1 && n.matches('tr[data-id]') && addRowCheckbox(n))))
-				.observe(tbody, { childList: true });
+            tr.insertBefore(td, tr.firstElementChild);
+        }
+        tbody.querySelectorAll('tr[data-id]').forEach(addRowCheckbox);
+        new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n =>
+                                                                            n.nodeType === 1 && n.matches('tr[data-id]') && addRowCheckbox(n))))
+            .observe(tbody, { childList: true });
 
-		function updateHeaderCounter() {
-			const count = tbody.querySelectorAll(
-				'td.DataGridView__td__checkBox input:checked'
-			).length;
-			const counter = document.getElementById('sbis-header-counter');
-			if (counter) counter.textContent = `Выбрано: ${count}`;
-		}
-		tbody.addEventListener('change', e => {
-			if (e.target.matches('td.DataGridView__td__checkBox input')) {
-				updateHeaderCounter();
-			}
-		});
+        function updateHeaderCounter() {
+            const count = tbody.querySelectorAll(
+                'td.DataGridView__td__checkBox input:checked'
+            ).length;
+            const counter = document.getElementById('sbis-header-counter');
+            if (counter) counter.textContent = `Выбрано: ${count}`;
+        }
+        tbody.addEventListener('change', e => {
+            if (e.target.matches('td.DataGridView__td__checkBox input')) {
+                updateHeaderCounter();
+            }
+        });
 
-		// 4. Панель кнопок над списком, справа от поиска
-		function insertPanel() {
-			if (document.getElementById('sbis-panel')) return;
-			const searchCell = document.querySelector('.controls-Browser__tableCell-search');
-			if (!searchCell || !searchCell.parentNode) return;
-			const container = searchCell.parentNode;
+        // 4. Панель кнопок над списком, справа от поиска
+        function insertPanel() {
+            if (document.getElementById('sbis-panel')) return;
+            const searchCell = document.querySelector('.controls-Browser__tableCell-search');
+            if (!searchCell || !searchCell.parentNode) return;
+            const container = searchCell.parentNode;
 
-			const panel = document.createElement('div');
-			panel.id = 'sbis-panel';
+            const panel = document.createElement('div');
+            panel.id = 'sbis-panel';
 
-			const panelLeft = document.createElement('div');
-			panelLeft.id = 'sbis-panel-left';
-			const panelRight = document.createElement('div');
-			panelRight.id = 'sbis-panel-right';
+            const panelLeft = document.createElement('div');
+            panelLeft.id = 'sbis-panel-left';
+            const panelRight = document.createElement('div');
+            panelRight.id = 'sbis-panel-right';
 
-			const btnAll = document.createElement('button');
-			btnAll.textContent = 'Выбрать все';
-			btnAll.className = 'controls-button';
-			btnAll.onclick = () => {
-				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = true);
-				updateHeaderCounter();
-			};
+            const btnAll = document.createElement('button');
+            btnAll.textContent = 'Выбрать все';
+            btnAll.className = 'controls-button';
+            btnAll.onclick = () => {
+                tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = true);
+                updateHeaderCounter();
+            };
 
-			const btnNone = document.createElement('button');
-			btnNone.textContent = 'Снять все';
-			btnNone.className = 'controls-button';
-			btnNone.onclick = () => {
-				tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
-				updateHeaderCounter();
-			};
+            const btnNone = document.createElement('button');
+            btnNone.textContent = 'Снять все';
+            btnNone.className = 'controls-button';
+            btnNone.onclick = () => {
+                tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
+                updateHeaderCounter();
+            };
 
-			const btnDelete = document.createElement('button');
-			btnDelete.textContent = 'Удалить выбранные';
-			btnDelete.className = 'controls-button';
-			btnDelete.onclick = () => {
-				const checked = Array.from(tbody.querySelectorAll('td.DataGridView__td__checkBox input:checked'));
-				const total = checked.length;
-				if (!total) {
-					alert('Не выбрано ни одного подключения для удаления.');
-					return;
-				} else if (total <= connectionLimitForDeletion) {
-					if (!confirm(`Вы удаляете ${total} подключений. Продолжить?`)) return;
-				} else if (total > connectionLimitForDeletion) {
-					if (!confirm(`Будут удалены первые ${connectionLimitForDeletion} из ${total} подключений - остальные останутся.\n` +
-								 `Необходимо будет обновить список и повторить удаление оставщихся.\n` +
-								 `Продолжить?`)) return;
-				}
+            const btnDelete = document.createElement('button');
+            btnDelete.textContent = 'Удалить выбранные';
+            btnDelete.className = 'controls-button';
+            btnDelete.onclick = () => {
+                const checked = Array.from(tbody.querySelectorAll('td.DataGridView__td__checkBox input:checked'));
+                const total = checked.length;
+                if (!total) {
+                    alert('Не выбрано ни одного подключения для удаления.');
+                    return;
+                } else if (total <= connectionLimitForDeletion) {
+                    if (!confirm(`Вы удаляете ${total} подключений. Продолжить?`)) return;
+                } else if (total > connectionLimitForDeletion) {
+                    if (!confirm(`Будут удалены первые ${connectionLimitForDeletion} из ${total} подключений - остальные останутся.\n` +
+                                 `Необходимо будет обновить список и повторить удаление оставщихся.\n` +
+                                 `Продолжить?`)) return;
+                }
 
-				const toDelete = checked.slice(0, connectionLimitForDeletion);
-				require(['Types/source'], src => {
-					const service = new src.SbisService({
-						endpoint: {
-							address: '/integration_config/service/',
-							contract: 'IntegrationConnection'
-						}
-					});
+                const toDelete = checked.slice(0, connectionLimitForDeletion);
+                require(['Types/source'], src => {
+                    const service = new src.SbisService({
+                        endpoint: {
+                            address: '/integration_config/service/',
+                            contract: 'IntegrationConnection'
+                        }
+                    });
 
-					toDelete.forEach(cb => {
-						service.call('DeleteConnection', { id: cb.dataset.id });
-						console.log(`Удалено подключение: ${cb.dataset.id}`);
-					});
+                    toDelete.forEach(cb => {
+                        service.call('DeleteConnection', { id: cb.dataset.id });
+                        console.log(`Удалено подключение: ${cb.dataset.id}`);
+                    });
 
-					tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
-					updateHeaderCounter();
-				});
-			};
+                    tbody.querySelectorAll('td.DataGridView__td__checkBox input').forEach(cb => cb.checked = false);
+                    updateHeaderCounter();
+                });
+            };
 
-			const counter = document.createElement('span');
-			counter.id = 'sbis-header-counter';
-			counter.textContent = 'Выбрано: 0';
+            const counter = document.createElement('span');
+            counter.id = 'sbis-header-counter';
+            counter.textContent = 'Выбрано: 0';
 
-			panelLeft.append(counter, btnAll, btnNone);
-			panelRight.append(btnDelete);
-			panel.append(panelLeft, panelRight);
-			container.insertBefore(panel, searchCell.nextSibling);
-		}
-		insertPanel();
-		new MutationObserver(insertPanel).observe(document.body, { childList: true, subtree: true });
+            panelLeft.append(counter, btnAll, btnNone);
+            panelRight.append(btnDelete);
+            panel.append(panelLeft, panelRight);
+            container.insertBefore(panel, searchCell.nextSibling);
+        }
+        insertPanel();
+        new MutationObserver(insertPanel).observe(document.body, { childList: true, subtree: true });
 
-	} catch (error) {
-		console.error('[Userscript] Ошибка:', error);
-	}
+    } catch (error) {
+        console.error('[Userscript] Ошибка:', error);
+    }
 })();
