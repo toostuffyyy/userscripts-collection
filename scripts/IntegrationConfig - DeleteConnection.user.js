@@ -2,7 +2,7 @@
 // @author       Evgeniy Lykhov
 // @name         Integration Config - Delete connection
 // @description  Пользовательский скрипт, добавляющий в список подключений на странице online.sbis.ru/integration_config/?Page=7 удобный интерфейс для выбора и удаления подключений напрямую, без необходимости удаления их вручную через сайт.
-// @version      29 (21-09-2025)
+// @version      30 (22-09-2025)
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
@@ -79,6 +79,7 @@
 
     try {
         const connectionLimitForDeletion = 50;
+        const MIN_COLUMNS = 6;
 
         const mainTable = await waitFor('.controls-DataGridView__table.ws-sticky-header__table');
         const mainTbody = mainTable.querySelector('tbody');
@@ -307,6 +308,18 @@
         */
         function processTable(tbl) {
             if (!tbl || !isInStickyContainer(tbl)) return;
+
+            // Проверяем число <col> в colgroup; если меньше MIN_COLUMNS — пропускаем
+            const cg = tbl.querySelector('colgroup');
+            if (cg) {
+                const colCount = cg.querySelectorAll('col').length;
+                if (colCount < MIN_COLUMNS) {
+                    console.debug(`[Userscript] пропускаем таблицу с ${colCount} колонками (< ${MIN_COLUMNS})`);
+                    return;
+                }
+            } else {
+                // если colgroup пока нет — не обрабатываем (наблюдатель ниже подхватит)
+            }
 
             // если уже обработана и th на месте — ничего не делаем
             if (processedStickyTables.has(tbl) && tbl.querySelector('thead tr th.DataGridView__td__checkBox')) return;
