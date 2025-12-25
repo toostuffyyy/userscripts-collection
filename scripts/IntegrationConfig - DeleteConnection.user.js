@@ -2,15 +2,15 @@
 // @author       Evgeniy Lykhov
 // @name         Integration Config - Delete connection
 // @description  Пользовательский скрипт, добавляющий в список подключений на странице online.sbis.ru/integration_config/?Page=7 удобный интерфейс для выбора и удаления подключений напрямую, без необходимости удаления их вручную через сайт.
-// @version      31.0
+// @version      30 (22-09-2025)
 // @match        https://online.sbis.ru/integration_config/?Page=7*
 // @match        https://online.sbis.ru/integration_config/?service=extExch&Page=7*
 // @match        https://fix-online.sbis.ru/integration_config/?Page=7*
 // @icon         https://cdn2.sbis.ru/cdn/SabyLogo/1.0.7/favicon/favicon.ico?v=1
 // @run-at       document-end
 // @namespace https://greasyfork.org/users/1497438
-// @downloadURL https://github.com/toostuffyyy/userscripts-collection/raw/refs/heads/main/scripts/IntegrationConfig%20-%20DeleteConnection.user.js
-// @updateURL https://github.com/toostuffyyy/userscripts-collection/raw/refs/heads/main/scripts/IntegrationConfig%20-%20DeleteConnection.user.js
+// @downloadURL https://update.greasyfork.org/scripts/543365/Integration%20Config%20-%20Delete%20connection.user.js
+// @updateURL https://update.greasyfork.org/scripts/543365/Integration%20Config%20-%20Delete%20connection.meta.js
 // ==/UserScript==
 
 (async function() {
